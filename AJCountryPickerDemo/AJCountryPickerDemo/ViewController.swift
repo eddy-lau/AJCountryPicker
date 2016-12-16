@@ -7,15 +7,19 @@
 //
 
 import UIKit
-import AJCountryPicker
+import AJCountryPicker2
 
 class ViewController: UIViewController {
 
 	// MARK:- IBOulets
 	@IBOutlet weak var label: UILabel!
+    
+    let defaultCountry = "US"
+    
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		// Do any additional setup after loading the view, typically from a nib.
+        label.text = "Selected Country: " + (Locale.current as NSLocale).displayName(forKey: .countryCode, value: defaultCountry)!
 	}
 
 	override func didReceiveMemoryWarning() {
@@ -26,11 +30,14 @@ class ViewController: UIViewController {
 	// MARK:- IBActions
 	@IBAction func selectCountryButtonTapped(_ sender: UIButton) -> Void {
 		let picker = AJCountryPicker { (country, code) -> () in
-			self.label.text = "Selected Country " + country
+			self.label.text = "Selected Country: " + country
 		}
 
 		// Optional: To pick from custom countries list
 		picker.customCountriesCode = ["EG", "US", "AF", "AQ", "AX", "IN"]
+        
+        // Optional: The initial selection
+        picker.selectedCountryCode = defaultCountry
 
 		// delegate
 		picker.delegate = self
@@ -44,11 +51,13 @@ class ViewController: UIViewController {
 		}
 		navigationController?.pushViewController(picker, animated: true)
 		//navigationController?.presentViewController(picker, animated: true, completion: nil)
+        
 	}
 }
 
 extension ViewController: AJCountryPickerDelegate {
 	func ajCountryPicker(_ picker: AJCountryPicker, didSelectCountryWithName name: String, code: String) {
 		label.text = "Selected Country: \(name)"
+        _ = navigationController?.popViewController(animated: true)
 	}
 }

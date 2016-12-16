@@ -465,7 +465,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = F2F3235C7D350F10B19D55D1 /* Pods-AJCountryPickerDemo.debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = AJCountryPickerDemo/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -479,7 +478,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 6C5EA027A5D8616A25BE23D9 /* Pods-AJCountryPickerDemo.release.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = AJCountryPickerDemo/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

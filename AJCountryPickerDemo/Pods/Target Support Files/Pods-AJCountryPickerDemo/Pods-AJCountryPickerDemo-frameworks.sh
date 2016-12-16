@@ -84,8 +84,8 @@ strip_invalid_archs() {
 
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
-  install_framework "$BUILT_PRODUCTS_DIR/AJCountryPicker/AJCountryPicker.framework"
+  install_framework "$BUILT_PRODUCTS_DIR/AJCountryPicker2/AJCountryPicker2.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
-  install_framework "$BUILT_PRODUCTS_DIR/AJCountryPicker/AJCountryPicker.framework"
+  install_framework "$BUILT_PRODUCTS_DIR/AJCountryPicker2/AJCountryPicker2.framework"
 fi

@@ -32,6 +32,17 @@ open class AJCountryPicker: UITableViewController {
 	open var countryWithCodeAndCallingCode: ((String, String, String) -> ())?
 	open var countryWithFlagAndCallingCode: ((String, String, String, UIImage?) -> ())?
 	open var showCallingCodes = false
+    var selectedCountry: AJCountry? {
+        didSet {
+            if let selectedCountry = selectedCountry {
+                title = selectedCountry.name
+                selectedCountryCode = selectedCountry.code
+            } else {
+                title = "Your Country"
+            }
+        }
+    }
+    open var selectedCountryCode:String?
 
 	// MARK: ..... Private Variables
 	fileprivate var searchController: UISearchController!
@@ -39,7 +50,7 @@ open class AJCountryPicker: UITableViewController {
 
 	fileprivate var allCountries: [AJCountry] {
 		let locale = Locale.current
-		var unsourtedCountries = [AJCountry]()
+		var unsortedCountries = [AJCountry]()
 		let countriesCodes = customCountriesCode == nil ? Locale.isoRegionCodes : customCountriesCode!
 
 		for countryCode in countriesCodes {
@@ -51,9 +62,9 @@ open class AJCountryPicker: UITableViewController {
 			} else {
 				country = AJCountry(name: displayName!, code: countryCode)
 			}
-			unsourtedCountries.append(country)
+			unsortedCountries.append(country)
 		}
-		return unsourtedCountries
+		return unsortedCountries
 	}
 
 	fileprivate var sections: [Section] {
@@ -82,6 +93,39 @@ open class AJCountryPicker: UITableViewController {
 
 		return sections
 	}
+    
+    fileprivate var indexPathOfSelectedCountry:IndexPath? {
+        
+        guard let selectedCountry = selectedCountry else {
+            return nil
+        }
+        
+        if searchController.searchBar.isFirstResponder || !showSection {
+            
+            for index in 0..<filteredList.count {
+                let country = filteredList[index]
+                if country.code == selectedCountry.code {
+                    return IndexPath(row: index, section: 0)
+                }
+            }
+            
+            return nil
+            
+        } else {
+
+            for section in 0..<sections.count {
+                for index in 0..<sections[section].countries.count {
+                    let country = sections[section].countries[index]
+                    if country.code == selectedCountry.code {
+                        return IndexPath(row: index, section: section)
+                    }
+                }
+            }
+            
+            return nil
+        }
+        
+    }
 
 	fileprivate let collation = UILocalizedIndexedCollation.current()
 	as UILocalizedIndexedCollation
@@ -101,8 +145,17 @@ open class AJCountryPicker: UITableViewController {
     
 	override open func viewDidLoad() {
 		super.viewDidLoad()
+        
+        if let selectedCountryCode = selectedCountryCode {
+            let selectedCountries = allCountries.filter({ (country) -> Bool in
+                return country.code == selectedCountryCode
+            })
+            if selectedCountries.count > 0 {
+                selectedCountry = selectedCountries[0]
+            }
+        }
+        
 		initUI()
-		// Do any additional setup after loading the view.
 	}
 
 	override open func didReceiveMemoryWarning() {
@@ -115,6 +168,7 @@ open class AJCountryPicker: UITableViewController {
 	fileprivate func createSearchBar() {
 		if self.tableView.tableHeaderView == nil {
 			searchController = UISearchController(searchResultsController: nil)
+            searchController.delegate = self
 			searchController.searchResultsUpdater = self
 			searchController.dimsBackgroundDuringPresentation = false
 			tableView.tableHeaderView = searchController.searchBar
@@ -148,7 +202,11 @@ open class AJCountryPicker: UITableViewController {
 		}
 		filteredList = allCountries
 		tableView.reloadData()
-	}
+        
+        if let indexPath = indexPathOfSelectedCountry {
+            tableView.scrollToRow(at: indexPath, at: .middle, animated: false)
+        }
+    }
 
 	fileprivate func isModal() -> Bool {
 		if self.presentingViewController != nil {
@@ -204,7 +262,7 @@ extension AJCountryPicker {
 			country = sections[indexPath.section].countries[indexPath.row]
 
 		}
-
+        
 		cell!.textLabel?.text = country.name
 		cell?.textLabel?.font = UIFont.systemFont(ofSize: 13, weight: 0.1)
 		cell!.textLabel?.numberOfLines = 0
@@ -212,6 +270,14 @@ extension AJCountryPicker {
 			cell!.detailTextLabel?.text = country.dialCode
 			cell!.detailTextLabel?.font = UIFont.systemFont(ofSize: 14)
 		}
+        
+        cell!.accessoryType = .none
+        if let selectedCountry = selectedCountry {
+            if selectedCountry.code == country.code {
+                cell!.accessoryType = .checkmark
+            }
+        }
+        
 
 		if showCountryFlags {
 			let bundle = "assets.bundle/"
@@ -263,6 +329,10 @@ extension AJCountryPicker {
 			country = sections[indexPath.section].countries[indexPath.row]
 
 		}
+        title = country.name
+        selectedCountry = country
+        tableView.reloadData()
+        
 		delegate?.ajCountryPicker(self, didSelectCountryWithName: country.name, code: country.code)
 		delegate?.ajCountryPicker?(self, didSelectCountryWithName: country.name, code: country.code, dialCode: country.dialCode)
 		countryWithCode?(country.name, country.code)
@@ -271,8 +341,9 @@ extension AJCountryPicker {
 		let image = UIImage(named: bundle + country.code.lowercased() + ".png", in: Bundle(for: AJCountryPicker.self), compatibleWith: nil)
 		countryWithFlagAndCallingCode?(country.name, country.code, country.dialCode, image)
 		delegate?.ajCountryPicker?(self, didSelectCountryWithName: country.name, code: country.code, dialCode: country.dialCode, flag: image)
-		self.dismiss(animated: true, completion: nil)
-		let _ = self.navigationController?.popViewController(animated: true)
+		//self.dismiss(animated: true, completion: nil)
+		//let _ = self.navigationController?.popViewController(animated: true)
+        
 	}
 }
 // MARK: - UISearchDisplayDelegate
@@ -281,4 +352,18 @@ extension AJCountryPicker: UISearchResultsUpdating {
 		let _ = filter(searchController.searchBar.text!)
 		tableView.reloadData()
 	}
+}
+
+// MARK: - UISearchControllerDelegate
+extension AJCountryPicker : UISearchControllerDelegate {
+    
+    public func didDismissSearchController(_ searchController: UISearchController) {
+        filteredList = allCountries
+        tableView.reloadData()
+    }
+    
+    public func didPresentSearchController(_ searchController: UISearchController) {
+        
+    }
+    
 }

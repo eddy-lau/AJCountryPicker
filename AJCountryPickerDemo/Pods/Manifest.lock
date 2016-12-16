@@ -1,16 +1,16 @@
 PODS:
-  - AJCountryPicker (1.0.0.1)
+  - AJCountryPicker2 (2.0.0)
 
 DEPENDENCIES:
-  - AJCountryPicker (from `../`)
+  - AJCountryPicker2 (from `../`)
 
 EXTERNAL SOURCES:
-  AJCountryPicker:
+  AJCountryPicker2:
     :path: "../"
 
 SPEC CHECKSUMS:
-  AJCountryPicker: bbaf251f92c0b50388f15a9e59111b73d6e26cce
+  AJCountryPicker2: 3570553175e89d6d2d533b897e56da659430afca
 
-PODFILE CHECKSUM: e15ca84959416bcaf84ece83ebeca791462861be
+PODFILE CHECKSUM: b6730d846d89113132f8b015c685fdba413f35ed
 
 COCOAPODS: 1.1.1
