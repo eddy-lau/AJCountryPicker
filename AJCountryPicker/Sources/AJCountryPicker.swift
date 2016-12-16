@@ -94,6 +94,11 @@ open class AJCountryPicker: UITableViewController {
 	}
 
 	// MARK:- View Life Cycle
+    deinit {
+        searchController.view.removeFromSuperview()
+    }
+    
+    
 	override open func viewDidLoad() {
 		super.viewDidLoad()
 		initUI()
