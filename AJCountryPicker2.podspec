@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
 #
 
 s.name         = "AJCountryPicker2"
-s.version      = "1.1.0"
+s.version      = "1.1.1"
 s.summary      = "AJCountryPicker2 is a country picker controller for iOS8+ with an option to search"
 
 # This description is used to generate tags and improve search results.
