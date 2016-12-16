@@ -267,13 +267,13 @@ extension AJCountryPicker {
 		countryWithFlagAndCallingCode?(country.name, country.code, country.dialCode, image)
 		delegate?.ajCountryPicker?(self, didSelectCountryWithName: country.name, code: country.code, dialCode: country.dialCode, flag: image)
 		self.dismiss(animated: true, completion: nil)
-		self.navigationController?.popViewController(animated: true)
+		let _ = self.navigationController?.popViewController(animated: true)
 	}
 }
 // MARK: - UISearchDisplayDelegate
 extension AJCountryPicker: UISearchResultsUpdating {
 	public func updateSearchResults(for searchController: UISearchController) {
-		filter(searchController.searchBar.text!)
+		let _ = filter(searchController.searchBar.text!)
 		tableView.reloadData()
 	}
 }

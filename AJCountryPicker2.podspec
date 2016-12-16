@@ -15,9 +15,9 @@ Pod::Spec.new do |s|
 #  summary should be tweet-length, and the description more in depth.
 #
 
-s.name         = "AJCountryPicker"
-s.version      = "1.0.0.1"
-s.summary      = "AJCountryPicker is a country picker controller for iOS8+ with an option to search"
+s.name         = "AJCountryPicker2"
+s.version      = "1.1.0"
+s.summary      = "AJCountryPicker2 is a country picker controller for iOS8+ with an option to search"
 
 # This description is used to generate tags and improve search results.
 #   * Think: What does it do? Why did you write it? What is the focus?
@@ -25,6 +25,7 @@ s.summary      = "AJCountryPicker is a country picker controller for iOS8+ with 
 #   * Write the description between the DESC delimiters below.
 #   * Finally, don't worry about the indent, CocoaPods strips it!
 s.description  = <<-DESC
+AJCountryPicker2 is an Xcode 8.2 and Swift 3 compatiblel fork of AJCountryPicker.
 AJCountryPicker is a country picker controller for iOS8+ with an option to search
 It also give user to hide or show section, country image icon or country calling code
 DESC
@@ -81,7 +82,7 @@ s.ios.deployment_target = "8.3"
 #  Supports git, hg, bzr, svn and HTTP.
 #
 
-s.source       = { :git => "https://github.com/techmehra/AJCountryPicker.git", :tag => "#{s.version}" }
+s.source       = { :git => "https://github.com/eddy-lau/AJCountryPicker.git", :tag => "#{s.version}" }
 
 
 # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
