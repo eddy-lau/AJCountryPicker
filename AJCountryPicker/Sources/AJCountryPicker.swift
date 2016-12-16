@@ -9,13 +9,13 @@
 import UIKit
 
 @objc public protocol AJCountryPickerDelegate: class {
-	func ajCountryPicker(picker: AJCountryPicker, didSelectCountryWithName name: String, code: String)
-	optional func ajCountryPicker(picker: AJCountryPicker, didSelectCountryWithName name: String, code: String, dialCode: String)
-	optional func ajCountryPicker(picker: AJCountryPicker, didSelectCountryWithName name: String, code: String, dialCode: String, flag: UIImage?)
+	func ajCountryPicker(_ picker: AJCountryPicker, didSelectCountryWithName name: String, code: String)
+	@objc optional func ajCountryPicker(_ picker: AJCountryPicker, didSelectCountryWithName name: String, code: String, dialCode: String)
+	@objc optional func ajCountryPicker(_ picker: AJCountryPicker, didSelectCountryWithName name: String, code: String, dialCode: String, flag: UIImage?)
 
 }
 
-public class AJCountryPicker: UITableViewController {
+open class AJCountryPicker: UITableViewController {
 
 	// MARK:- Constants
 
@@ -23,27 +23,27 @@ public class AJCountryPicker: UITableViewController {
 
 	// MARK:- Variables
 	// MARK: ..... Public Variables
-	public var customCountriesCode: [String]?
-	public var showCountryFlags = true
-	public var showSection = false
-	public var showSearchBar = true
-	public weak var delegate: AJCountryPickerDelegate?
-	public var countryWithCode: ((String, String) -> ())?
-	public var countryWithCodeAndCallingCode: ((String, String, String) -> ())?
-	public var countryWithFlagAndCallingCode: ((String, String, String, UIImage?) -> ())?
-	public var showCallingCodes = false
+	open var customCountriesCode: [String]?
+	open var showCountryFlags = true
+	open var showSection = false
+	open var showSearchBar = true
+	open weak var delegate: AJCountryPickerDelegate?
+	open var countryWithCode: ((String, String) -> ())?
+	open var countryWithCodeAndCallingCode: ((String, String, String) -> ())?
+	open var countryWithFlagAndCallingCode: ((String, String, String, UIImage?) -> ())?
+	open var showCallingCodes = false
 
 	// MARK: ..... Private Variables
-	private var searchController: UISearchController!
-	private var filteredList = [AJCountry]()
+	fileprivate var searchController: UISearchController!
+	fileprivate var filteredList = [AJCountry]()
 
-	private var allCountries: [AJCountry] {
-		let locale = NSLocale.currentLocale()
+	fileprivate var allCountries: [AJCountry] {
+		let locale = Locale.current
 		var unsourtedCountries = [AJCountry]()
-		let countriesCodes = customCountriesCode == nil ? NSLocale.ISOCountryCodes() : customCountriesCode!
+		let countriesCodes = customCountriesCode == nil ? Locale.isoRegionCodes : customCountriesCode!
 
 		for countryCode in countriesCodes {
-			let displayName = locale.displayNameForKey(NSLocaleCountryCode, value: countryCode)
+			let displayName = (locale as NSLocale).displayName(forKey: NSLocale.Key.countryCode, value: countryCode)
 			let countryData = AJCallingCodes.filter { $0["code"] == countryCode }
 			let country: AJCountry
 			if countryData.count > 0, let dialCode = countryData[0]["dialCode"] {
@@ -56,10 +56,10 @@ public class AJCountryPicker: UITableViewController {
 		return unsourtedCountries
 	}
 
-	private var sections: [Section] {
+	fileprivate var sections: [Section] {
 		let countries: [AJCountry] = allCountries.map { country in
 			let country = AJCountry(name: country.name, code: country.code, dialCode: country.dialCode)
-			country.section = collation.sectionForObject(country, collationStringSelector: Selector("name"))
+			country.section = collation.section(for: country, collationStringSelector: #selector(getter: AJCountry.name))
 			return country
 		}
 
@@ -77,37 +77,37 @@ public class AJCountryPicker: UITableViewController {
 		// sort each section
 		for section in sections {
 			var s = section
-			s.countries = collation.sortedArrayFromArray(section.countries, collationStringSelector: Selector("name")) as! [AJCountry]
+			s.countries = collation.sortedArray(from: section.countries, collationStringSelector: #selector(getter: AJCountry.name)) as! [AJCountry]
 		}
 
 		return sections
 	}
 
-	private let collation = UILocalizedIndexedCollation.currentCollation()
+	fileprivate let collation = UILocalizedIndexedCollation.current()
 	as UILocalizedIndexedCollation
 
 	// MARK:- Initalizer
-	convenience public init(completionHandler: ((String, String) -> ())) {
+	convenience public init(completionHandler: @escaping ((String, String) -> ())) {
 		self.init()
 		self.countryWithCode = completionHandler
 
 	}
 
 	// MARK:- View Life Cycle
-	override public func viewDidLoad() {
+	override open func viewDidLoad() {
 		super.viewDidLoad()
 		initUI()
 		// Do any additional setup after loading the view.
 	}
 
-	override public func didReceiveMemoryWarning() {
+	override open func didReceiveMemoryWarning() {
 		super.didReceiveMemoryWarning()
 		// Dispose of any resources that can be recreated.
 	}
 
 	// MARK: Private Methods
 
-	private func createSearchBar() {
+	fileprivate func createSearchBar() {
 		if self.tableView.tableHeaderView == nil {
 			searchController = UISearchController(searchResultsController: nil)
 			searchController.searchResultsUpdater = self
@@ -116,13 +116,13 @@ public class AJCountryPicker: UITableViewController {
 		}
 	}
 
-	private func filter(searchText: String) -> [AJCountry] {
+	fileprivate func filter(_ searchText: String) -> [AJCountry] {
 		filteredList.removeAll()
 		sections.forEach { (section) -> () in
 			section.countries.forEach({ (country) -> () in
 				if country.name.characters.count >= searchText.characters.count {
-					let result = country.name.compare(searchText, options: [.CaseInsensitiveSearch, .DiacriticInsensitiveSearch], range: searchText.startIndex ..< searchText.endIndex)
-					if result == .OrderedSame {
+					let result = country.name.compare(searchText, options: [.caseInsensitive, .diacriticInsensitive], range: searchText.range(of: searchText))
+					if result == .orderedSame {
 						filteredList.append(country)
 					}
 				}
@@ -132,7 +132,7 @@ public class AJCountryPicker: UITableViewController {
 		return filteredList
 	}
 
-	private func initUI() -> Void {
+	fileprivate func initUI() -> Void {
 		definesPresentationContext = true
 		if isModal () {
 			tableView.contentInset.top = 20
@@ -145,7 +145,7 @@ public class AJCountryPicker: UITableViewController {
 		tableView.reloadData()
 	}
 
-	private func isModal() -> Bool {
+	fileprivate func isModal() -> Bool {
 		if self.presentingViewController != nil {
 			return true
 		}
@@ -169,31 +169,31 @@ public class AJCountryPicker: UITableViewController {
 //MARK:- Table View Data Source
 extension AJCountryPicker {
 
-	public override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-		if searchController.searchBar.isFirstResponder() || !showSection {
+	open override func numberOfSections(in tableView: UITableView) -> Int {
+		if searchController.searchBar.isFirstResponder || !showSection {
 			return 1
 		}
 		return sections.count
 	}
-	public override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+	open override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
 
-		if searchController.searchBar.isFirstResponder() || !showSection {
+		if searchController.searchBar.isFirstResponder || !showSection {
 			return filteredList.count
 		}
 		return sections[section].countries.count
 	}
-	public override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+	open override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 		return self.tableView(tableView, countryCellForRowAtIndexPath: indexPath)
 	}
-	func tableView(tableView: UITableView, countryCellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-		var cell: UITableViewCell? = tableView.dequeueReusableCellWithIdentifier(countryCellIdentifier)
+	func tableView(_ tableView: UITableView, countryCellForRowAtIndexPath indexPath: IndexPath) -> UITableViewCell {
+		var cell: UITableViewCell? = tableView.dequeueReusableCell(withIdentifier: countryCellIdentifier)
 		if cell == nil {
-			cell = UITableViewCell(style: .Value1, reuseIdentifier: countryCellIdentifier)
+			cell = UITableViewCell(style: .value1, reuseIdentifier: countryCellIdentifier)
 		}
 
 		let country: AJCountry!
 
-		if searchController.searchBar.isFirstResponder() || !showSection {
+		if searchController.searchBar.isFirstResponder || !showSection {
 			country = filteredList[indexPath.row]
 		} else {
 			country = sections[indexPath.section].countries[indexPath.row]
@@ -201,28 +201,28 @@ extension AJCountryPicker {
 		}
 
 		cell!.textLabel?.text = country.name
-		cell?.textLabel?.font = UIFont.systemFontOfSize(13, weight: 0.1)
+		cell?.textLabel?.font = UIFont.systemFont(ofSize: 13, weight: 0.1)
 		cell!.textLabel?.numberOfLines = 0
 		if showCallingCodes {
 			cell!.detailTextLabel?.text = country.dialCode
-			cell!.detailTextLabel?.font = UIFont.systemFontOfSize(14)
+			cell!.detailTextLabel?.font = UIFont.systemFont(ofSize: 14)
 		}
 
 		if showCountryFlags {
 			let bundle = "assets.bundle/"
-			cell!.imageView!.image = UIImage(named: bundle + country.code.lowercaseString + ".png", inBundle: NSBundle(forClass: AJCountryPicker.self), compatibleWithTraitCollection: nil)
+			cell!.imageView!.image = UIImage(named: bundle + country.code.lowercased() + ".png", in: Bundle(for: AJCountryPicker.self), compatibleWith: nil)
 			let itemSize = CGSize(width: 35, height: 25)
-			UIGraphicsBeginImageContextWithOptions(itemSize, false, UIScreen.mainScreen().scale)
-			let imageRect = CGRectMake(0.0, 0.0, itemSize.width, itemSize.height)
-			cell!.imageView?.image!.drawInRect(imageRect)
-			cell!.imageView?.image! = UIGraphicsGetImageFromCurrentImageContext()
+			UIGraphicsBeginImageContextWithOptions(itemSize, false, UIScreen.main.scale)
+			let imageRect = CGRect(x: 0.0, y: 0.0, width: itemSize.width, height: itemSize.height)
+			cell!.imageView?.image?.draw(in: imageRect)
+			cell!.imageView?.image = UIGraphicsGetImageFromCurrentImageContext()
 			UIGraphicsEndImageContext()
 		}
 
 		return cell!
 	}
 
-	override public func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+	override open func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
 		if !showSection {
 			return ""
 		}
@@ -232,27 +232,27 @@ extension AJCountryPicker {
 		return ""
 	}
 
-	override public func sectionIndexTitlesForTableView(tableView: UITableView) -> [String]? {
+	override open func sectionIndexTitles(for tableView: UITableView) -> [String]? {
 		if !showSection {
 			return []
 		}
 		return collation.sectionIndexTitles
 	}
 
-	override public func tableView(tableView: UITableView, sectionForSectionIndexTitle title: String, atIndex index: Int) -> Int {
+	override open func tableView(_ tableView: UITableView, sectionForSectionIndexTitle title: String, at index: Int) -> Int {
 		if !showSection {
 			return 0
 		}
-		return collation.sectionForSectionIndexTitleAtIndex(index)
+		return collation.section(forSectionIndexTitle: index)
 	}
 }
 // MARK: - Table view delegate
 
 extension AJCountryPicker {
-	override public func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-		tableView.deselectRowAtIndexPath(indexPath, animated: true)
+	override open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+		tableView.deselectRow(at: indexPath, animated: true)
 		let country: AJCountry!
-		if searchController.searchBar.isFirstResponder() || !showSection {
+		if searchController.searchBar.isFirstResponder || !showSection {
 			country = filteredList[indexPath.row]
 		} else {
 			country = sections[indexPath.section].countries[indexPath.row]
@@ -263,16 +263,16 @@ extension AJCountryPicker {
 		countryWithCode?(country.name, country.code)
 		countryWithCodeAndCallingCode?(country.name, country.code, country.dialCode)
 		let bundle = "assets.bundle/"
-		let image = UIImage(named: bundle + country.code.lowercaseString + ".png", inBundle: NSBundle(forClass: AJCountryPicker.self), compatibleWithTraitCollection: nil)
+		let image = UIImage(named: bundle + country.code.lowercased() + ".png", in: Bundle(for: AJCountryPicker.self), compatibleWith: nil)
 		countryWithFlagAndCallingCode?(country.name, country.code, country.dialCode, image)
 		delegate?.ajCountryPicker?(self, didSelectCountryWithName: country.name, code: country.code, dialCode: country.dialCode, flag: image)
-		self.dismissViewControllerAnimated(true, completion: nil)
-		self.navigationController?.popViewControllerAnimated(true)
+		self.dismiss(animated: true, completion: nil)
+		self.navigationController?.popViewController(animated: true)
 	}
 }
 // MARK: - UISearchDisplayDelegate
 extension AJCountryPicker: UISearchResultsUpdating {
-	public func updateSearchResultsForSearchController(searchController: UISearchController) {
+	public func updateSearchResults(for searchController: UISearchController) {
 		filter(searchController.searchBar.text!)
 		tableView.reloadData()
 	}

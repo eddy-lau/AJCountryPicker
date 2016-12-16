@@ -12,7 +12,7 @@ import AJCountryPicker
 class ViewController: UIViewController {
 
 	// MARK:- IBOulets
-	@IBOutlet private weak var label: UILabel!
+	@IBOutlet weak var label: UILabel!
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		// Do any additional setup after loading the view, typically from a nib.
@@ -24,7 +24,7 @@ class ViewController: UIViewController {
 	}
 
 	// MARK:- IBActions
-	@IBAction func selectCountryButtonTapped(sender: UIButton) -> Void {
+	@IBAction func selectCountryButtonTapped(_ sender: UIButton) -> Void {
 		let picker = AJCountryPicker { (country, code) -> () in
 			self.label.text = "Selected Country " + country
 		}
@@ -48,7 +48,7 @@ class ViewController: UIViewController {
 }
 
 extension ViewController: AJCountryPickerDelegate {
-	func ajCountryPicker(picker: AJCountryPicker, didSelectCountryWithName name: String, code: String) {
+	func ajCountryPicker(_ picker: AJCountryPicker, didSelectCountryWithName name: String, code: String) {
 		label.text = "Selected Country: \(name)"
 	}
 }

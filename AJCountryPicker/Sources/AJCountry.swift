@@ -26,7 +26,7 @@ class AJCountry :NSObject {
 struct Section {
     
     var countries = [AJCountry]()
-    mutating func addCountry(country: AJCountry) -> Void {
+    mutating func addCountry(_ country: AJCountry) -> Void {
         countries.append(country)
     }
 }
